@@ -512,9 +512,12 @@
 
   </div>
 
-  <script src="./js/device.js"></script>
-  <script src="./js/version.js"></script>
-  <script src="./js/packages.js"></script>
+  <script>
+    var _v = Math.floor(Date.now() / 1000);
+    document.write('<script src="./js/device.js?v=' + _v + '"><\/script>');
+    document.write('<script src="./js/version.js?v=' + _v + '"><\/script>');
+    document.write('<script src="./js/packages.js?v=' + _v + '"><\/script>');
+  </script>
 </body>
 
 </html>
