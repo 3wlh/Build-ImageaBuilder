@@ -270,7 +270,8 @@
     }
 
     function createIssues() {
-      var title = "build " + new Date().toISOString().substr(0, 10);
+      var d = new Date().toISOString();
+      var title = "build " + d.substr(0, 10) + "-" + d.substr(11, 2) + d.substr(14, 2) + d.substr(17, 2);
       var body = {};
 
       body["branch"] = $("#branch").val();
@@ -469,7 +470,7 @@
       </div>
       <div class="form-group-body">
         <textarea class="textarea-style input-contrast input-sm" type="text" id="script"
-          name="inputs[script]" style="height: 120px;" placeholder="可选，输入自定义 Shell 脚本内容"></textarea>
+          name="inputs[script]" style="height: 120px;" placeholder="可选，输入自定义 Shell 脚本内容，如果脚本内容过长就填入脚本网址"></textarea>
       </div>
     </div>
 
