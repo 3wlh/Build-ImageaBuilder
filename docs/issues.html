@@ -308,28 +308,7 @@
       var SAFE_MARGIN = 500;
 
       if (script_content) {
-        var testBody = Object.assign({}, body);
-        testBody["script"] = script_content;
-        var testUrl = `https://github.com/${repo}/issues/new?title=${title}&body=${encodeURIComponent(JSON.stringify(testBody))}`;
-        
-        if (testUrl.length > MAX_URL_LENGTH - SAFE_MARGIN) {
-          var truncatedScript = script_content;
-          var maxScriptLength = script_content.length - (testUrl.length - (MAX_URL_LENGTH - SAFE_MARGIN));
-          
-          if (maxScriptLength > 200) {
-            truncatedScript = script_content.substring(0, maxScriptLength) + "\n\n... [脚本过长已截断，完整脚本请通过评论补充或使用Gist] ...";
-            body["script"] = truncatedScript;
-            
-            if (!confirm("自定义脚本内容较长，URL可能超出限制。\n\n将自动截断脚本内容，剩余部分请在创建 Issue 后通过评论补充。\n\n是否继续？")) {
-              return;
-            }
-          } else {
-            alert("自定义脚本内容太长，无法通过 URL 传递！\n\n建议解决方案：\n1. 将脚本上传到 GitHub Gist: https://gist.github.com/\n2. 在 Custom Script 中只填写 Gist 链接\n3. 或暂时移除自定义脚本，创建 Issue 后在评论中补充");
-            return;
-          }
-        } else {
-          body["script"] = script_content;
-        }
+        body["script"] = script_content;
       }
 
       body = JSON.stringify(body);
