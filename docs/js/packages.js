@@ -3,6 +3,7 @@ var packages = {
   "luci-app-socat": "端口转发",
   "luci-app-scriptrun": "在线配置",
   "luci-app-v2ray-server": "v2ray服务",
+  "xray-core": "xray内核",
   "luci-app-openlist2": "openlist2",
   "luci-app-sunpanel": "Sunpanel网页导航",
   "luci-app-diskman": "磁盘管理",
