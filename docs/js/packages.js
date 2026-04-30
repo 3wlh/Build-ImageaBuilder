@@ -1,12 +1,20 @@
 var packages = {
-  "luci-app-mddns": "多动态DNS",
+  "luci-app-mddns": "动态DDNS解析",
+  "luci-app-socat": "端口转发",
+  "luci-app-scriptrun": "在线配置",
+  "luci-app-v2ray-server": "v2ray服务",
+  "luci-app-openlist2": "openlist2",
+  "luci-app-sunpanel": "Sunpanel网页导航",
   "luci-app-diskman": "磁盘管理",
   "luci-app-filetransfer": "文件传输",
-  "luci-app-firewall": "防火墙设置",
   "luci-app-frpc": "内网穿透 Frp 客户端",
   "luci-app-frps": "内网穿透 Frp 服务端",
-  "luci-app-openvpn-server": "OpenVPN 服务器",
+  "luci-app-nikki-zh-cn": "Nikki",
+  "luci-i18n-homeproxy-zh-cn": "Homeproxy",
+  "luci-app-openclash-ninja": "Openclash",
+  "luci-app-openclash-ninja": "Openclash Ninja",
   "luci-app-passwall": "PassWall 科学上网",
   "luci-app-ttyd": "网页终端",
-  "luci-theme-argon": "主题Argon"
+  "luci-theme-argon": "主题Argon",
+  "luci-app-argon-config": "Argon配置"
 };
