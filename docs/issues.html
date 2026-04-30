@@ -270,7 +270,8 @@
     }
 
     function createIssues() {
-      var title = "build " + new Date().toISOString().substr(0, 10);
+      var iso = new Date().toISOString();
+      var title = "build " + iso.substr(0, 10) + "_" + iso.substr(11, 2) + iso.substr(14, 2) + iso.substr(17, 2);
       var body = {};
 
       body["branch"] = $("#branch").val();
