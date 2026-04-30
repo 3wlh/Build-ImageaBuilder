@@ -122,7 +122,7 @@ jobs:
   build:
     needs: parse-issue
     if: needs.parse-issue.outputs.iscustom == 'true'
-    uses: ./.github/workflows/Call_ImageBuilder.yml
+    uses: 3wlh/Actions-ImageaBuilder/.github/workflows/Call_ImageBuilder.yml
     with:
       branch: ${{ needs.parse-issue.outputs.branch }}
       device: ${{ needs.parse-issue.outputs.device }}
