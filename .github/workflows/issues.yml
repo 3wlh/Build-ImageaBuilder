@@ -157,7 +157,7 @@ jobs:
   build:
     needs: parse-issue
     if: needs.parse-issue.outputs.iscustom == 'true'
-    uses: 3wlh/Actions-ImageaBuilder/.github/workflows/Call_ImageBuilder_Issues.yml
+    uses: 3wlh/Actions-ImageaBuilder/.github/workflows/Call_ImageBuilder_Issues.yml@main
     with:
       branch: ${{ needs.parse-issue.outputs.branch }}
       image: ${{ needs.parse-issue.outputs.image }}
