@@ -12,7 +12,7 @@ var packages = {
   "luci-app-frps": "内网穿透 Frp 服务端",
   "luci-app-nikki-zh-cn": "Nikki",
   "luci-i18n-homeproxy-zh-cn": "Homeproxy",
-  "luci-app-openclash-ninja": "Openclash",
+  "luci-app-openclash": "Openclash",
   "luci-app-openclash-ninja": "Openclash Ninja",
   "luci-app-passwall": "PassWall 科学上网",
   "luci-app-ttyd": "网页终端",
