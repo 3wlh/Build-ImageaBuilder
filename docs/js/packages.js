@@ -1,28 +1,3 @@
-var versions = {
-  "openwrt": [
-    "24.10-SNAPSHOT",
-    "24.10.6",
-    "24.10.5",
-    "24.10.4",
-    "24.10.3",
-    "24.10.2",
-    "24.10.1",
-    "24.10.0",
-    "23.05.5"
-  ],
-  "immortalwrt": [
-    "24.10-SNAPSHOT",
-    "24.10.6",
-    "24.10.5",
-    "24.10.4",
-    "24.10.3",
-    "24.10.2",
-    "24.10.1",
-    "24.10.0",
-    "23.05.5"
-  ]
-};
-
 var packages = {
   "luci-app-mddns": "多动态DNS",
   "luci-app-diskman": "磁盘管理",
@@ -33,5 +8,5 @@ var packages = {
   "luci-app-openvpn-server": "OpenVPN 服务器",
   "luci-app-passwall": "PassWall 科学上网",
   "luci-app-ttyd": "网页终端",
-  "luci-theme-argon": "主题Argon",
+  "luci-theme-argon": "主题Argon"
 };
