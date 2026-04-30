@@ -45,7 +45,48 @@
       margin-top: 1rem;
       margin-bottom: 1rem;
     }
-  </style>
+
+    .device-row {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+
+    .device-row > div {
+      width: 100%;
+    }
+
+    #packages_btns {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+      padding: 0.5rem;
+    }
+
+    #packages_btns button {
+      font-size: 12px;
+      padding: 4px 10px;
+      border-radius: 6px;
+      transition: all 0.2s ease;
+    }
+
+    #packages_btns button.btn-primary {
+      background-color: #238636;
+      color: white;
+      border: 1px solid rgba(240,246,252,0.1);
+    }
+
+    #packages_btns button.btn-danger {
+      background-color: #cf222e;
+      color: white;
+      border: 1px solid rgba(255,255,255,0.1);
+    }
+
+    #packages_btns button:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+    }
+    </style>
   <script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
   <script type="application/javascript">
     var repo = "3wlh/Actions-ImageaBuilder";
@@ -68,13 +109,101 @@
 
     window.onload = function () {
       init();
-    }
+    };
 
     function init() {
       $("#branch").on("change", changeBranch);
       $("#enable_pppoe").on("change", togglePPPoE);
-      togglePPPoE();
+      $("#image_select").on("change", changeProfile);
+      $("#packages").on("input", createPackagesBtn);
+
+      loadFormData();
+      setImageOptions();
       changeBranch();
+      createPackagesBtn();
+      togglePPPoE();
+    }
+
+    function saveFormData() {
+      var formData = {
+        branch: $("#branch").val(),
+        image: $("#image_select").val(),
+        device: $("#profile_select").val(),
+        version: $("#version").val(),
+        rootfs_partsize: $("#rootfs_partsize").val(),
+        network_lan: $("#network_lan").val(),
+        docker: $("#docker").val(),
+        enable_pppoe: $("#enable_pppoe").val(),
+        pppoe_account: $("#pppoe_account").val(),
+        pppoe_password: $("#pppoe_password").val(),
+        packages: $("#packages").val(),
+        script: $("#script").val()
+      };
+      localStorage.setItem('imagebuilder_form', JSON.stringify(formData));
+    }
+
+    function loadFormData() {
+      var saved = localStorage.getItem('imagebuilder_form');
+      if (saved) {
+        try {
+          var formData = JSON.parse(saved);
+          if (formData.branch) $("#branch").val(formData.branch);
+          if (formData.rootfs_partsize) $("#rootfs_partsize").val(formData.rootfs_partsize);
+          if (formData.network_lan) $("#network_lan").val(formData.network_lan);
+          if (formData.docker) $("#docker").val(formData.docker);
+          if (formData.enable_pppoe) $("#enable_pppoe").val(formData.enable_pppoe);
+          if (formData.pppoe_account) $("#pppoe_account").val(formData.pppoe_account);
+          if (formData.pppoe_password) $("#pppoe_password").val(formData.pppoe_password);
+          if (formData.packages) $("#packages").val(formData.packages);
+          if (formData.script) $("#script").val(formData.script);
+        } catch (e) {
+          console.error('Load form data error:', e);
+        }
+      }
+    }
+
+    function setImageOptions() {
+      var imageSelect = $("#image_select")[0];
+      imageSelect.options.length = 0;
+
+      var firstImage = null;
+      for (var img in image) {
+        if (!firstImage) firstImage = img;
+        imageSelect.options.add(new Option(img, img));
+      }
+
+      var saved = localStorage.getItem('imagebuilder_form');
+      var savedImage = saved ? JSON.parse(saved).image : null;
+      
+      if (savedImage && image[savedImage]) {
+        imageSelect.value = savedImage;
+      } else if (firstImage) {
+        imageSelect.value = firstImage;
+      }
+      changeProfile();
+    }
+
+    function changeProfile() {
+      var selectedImage = $("#image_select").val();
+      var profileSelect = $("#profile_select")[0];
+      profileSelect.options.length = 0;
+
+      if (selectedImage && image[selectedImage]) {
+        var profiles = image[selectedImage];
+        profiles.forEach(function (p, index) {
+          profileSelect.options.add(new Option(p, p));
+        });
+        
+        var saved = localStorage.getItem('imagebuilder_form');
+        var savedDevice = saved ? JSON.parse(saved).device : null;
+        
+        if (savedDevice && profiles.includes(savedDevice)) {
+          profileSelect.value = savedDevice;
+        } else if (profiles.length > 0) {
+          profileSelect.value = profiles[0];
+        }
+      }
+      saveFormData();
     }
 
     function changeBranch() {
@@ -82,17 +211,17 @@
       var versionSelect = $("#version")[0];
       versionSelect.options.length = 0;
 
-      if (branch === "openwrt") {
-        var versions = ["23.05.5", "23.05.4", "23.05.3", "23.05.2", "23.05.1", "23.05.0", "SNAPSHOT"];
-        versions.forEach(function (v) {
-          versionSelect.options.add(new Option(v, v));
-        });
-      } else if (branch === "immortalwrt") {
-        var versions = ["23.05.4", "23.05.3", "23.05.2", "23.05.1", "23.05.0", "SNAPSHOT"];
-        versions.forEach(function (v) {
-          versionSelect.options.add(new Option(v, v));
-        });
+      var versionList = versions[branch] || versions["openwrt"];
+      versionList.forEach(function (v) {
+        versionSelect.options.add(new Option(v, v));
+      });
+
+      var saved = localStorage.getItem('imagebuilder_form');
+      var savedVersion = saved ? JSON.parse(saved).version : null;
+      if (savedVersion && versionList.includes(savedVersion)) {
+        versionSelect.value = savedVersion;
       }
+      saveFormData();
     }
 
     function togglePPPoE() {
@@ -104,25 +233,81 @@
         $("#pppoe_account_item").hide();
         $("#pppoe_password_item").hide();
       }
+      saveFormData();
+    }
+
+    function createPackagesBtn() {
+      var packagesVal = $('#packages').val() || '';
+      var selectedPackages = packagesVal.split(/[\s,]+/).map(s => s.trim()).filter(s => s);
+      var html = `<div id="packages_btns">`;
+      
+      for (var pkg in packages) {
+        var isSelected = selectedPackages.includes(pkg);
+        var btnClass = isSelected ? "btn btn-primary btn-sm mt-2 btn-danger" : "btn btn-primary btn-sm mt-2";
+        var desc = packages[pkg] || "";
+        var label = desc ? `${pkg} ${desc}` : pkg;
+        html += `<button type="button" class="${btnClass}" id="pkg_${pkg}" onclick="togglePackage('${pkg}')">${label}</button>`;
+      }
+      html += `</div>`;
+      $('#packages_container').html(html);
+    }
+
+    function togglePackage(pkg) {
+      var btnobj = $("#pkg_" + pkg);
+      var packagesVal = $('#packages').val() || '';
+      var pkgstr = packagesVal.split(/[\s,]+/).map(s => s.trim()).filter(s => s);
+
+      if (btnobj.hasClass("btn-danger")) {
+        pkgstr = pkgstr.filter(p => p !== pkg);
+        btnobj.removeClass("btn-danger");
+      } else {
+        btnobj.addClass("btn-danger");
+        pkgstr.push(pkg);
+      }
+
+      $('#packages').val(pkgstr.join(" "));
+      saveFormData();
     }
 
     function createIssues() {
       var title = "build " + new Date().toISOString().substr(0, 10);
       var body = {};
 
-      var parameters = ["branch", "device", "version", "rootfs_partsize", "network_lan", "docker", "enable_pppoe", "pppoe_account", "pppoe_password"];
+      body["branch"] = $("#branch").val();
+      
+      var selectedImage = $("#image_select").val();
+      var selectedProfile = $("#profile_select").val();
+      if (selectedImage) {
+        body["image"] = selectedImage;
+      }
+      if (selectedProfile) {
+        body["device"] = selectedProfile;
+      }
+      
+      body["version"] = $("#version").val();
+      body["rootfs_partsize"] = $("#rootfs_partsize").val();
+      body["network_lan"] = $("#network_lan").val();
+      body["docker"] = $("#docker").val();
+      body["enable_pppoe"] = $("#enable_pppoe").val();
 
-      parameters.forEach(function (name) {
-        if ($("#" + name).is(":hidden")) {
-          return;
-        }
-        var value = $("#" + name).val();
-        if (value) {
-          body[name] = value;
-        }
-      });
+      if ($("#enable_pppoe").val() === "true") {
+        var pppoe_account = $("#pppoe_account").val();
+        var pppoe_password = $("#pppoe_password").val();
+        if (pppoe_account) body["pppoe_account"] = pppoe_account;
+        if (pppoe_password) body["pppoe_password"] = pppoe_password;
+      }
 
-      body = JSON.stringify(body, null, 2).replace(/\+/g, "%2b");
+      var packages_list = $("#packages").val().trim();
+      if (packages_list) {
+        body["packages"] = packages_list;
+      }
+
+      var script_content = $("#script").val().trim();
+      if (script_content) {
+        body["script"] = script_content;
+      }
+
+      body = JSON.stringify(body);
       window.location.href = `https://github.com/${repo}/issues/new?title=${title}&body=${encodeURIComponent(body)}`;
     }
   </script>
@@ -143,7 +328,7 @@
           color: #00bfff;
           text-align: center;
         ">
-      <h1>OpenWrt / ImmortalWrt ImageBuilder</h1>
+      <h1>ImageBuilder</h1>
     </div>
     <div class="shields" id="labels">
       <a id="titleA" href="https://github.com/3wlh/Actions-ImageaBuilder">
@@ -158,61 +343,72 @@
 
     <div class="form-group mt-1 mb-2" id="branch_item">
       <div class="form-group-header">
-        <label class="color-fg-default text-mono f6">Branch:</label>
+        <label class="color-fg-default text-mono f6">Branch: (分支)</label>
       </div>
       <div class="form-group-body">
         <select class="form-select form-control select-sm input-contrast" id="branch" name="inputs[branch]" value="">
-          <option selected="selected" value="openwrt">openwrt</option>
-          <option value="immortalwrt">immortalwrt</option>
+          <option selected="selected" value="immortalwrt">immortalwrt</option>
+          <option value="openwrt">openwrt</option>
         </select>
       </div>
     </div>
 
     <div class="form-group mt-1 mb-2" id="device_item">
-      <div class="form-group-header">
-        <label class="color-fg-default text-mono f6">Device:</label>
-      </div>
-      <div class="form-group-body">
-        <input class="form-control input-contrast input-sm" type="text" id="device" name="inputs[device]"
-          placeholder="e.g., x86-64, rockchip-armv8, ramips-mt7621" value="x86-64" />
+      <div class="device-row">
+        <div>
+          <label class="color-fg-default text-mono f6 d-block mb-1">Image: (镜像)</label>
+          <select class="form-select form-control select-sm input-contrast" id="image_select"
+            name="inputs[image]" value="">
+          </select>
+        </div>
+        <div>
+          <label class="color-fg-default text-mono f6 d-block mb-1">Device: (设备)</label>
+          <select class="form-select form-control select-sm input-contrast" id="profile_select"
+            name="inputs[profile]" value="">
+          </select>
+        </div>
       </div>
     </div>
 
     <div class="form-group mt-1 mb-2" id="version_item">
       <div class="form-group-header">
-        <label class="color-fg-default text-mono f6">Version:</label>
+        <label class="color-fg-default text-mono f6">Version: (版本)</label>
       </div>
       <div class="form-group-body">
         <select class="form-select form-control select-sm input-contrast" id="version" name="inputs[version]"
           value="">
-          <option selected="selected" value="23.05.5">23.05.5</option>
+          <option selected="selected" value="24.10.6">24.10.6</option>
         </select>
       </div>
     </div>
 
     <div class="form-group mt-1 mb-2" id="rootfs_partsize_item">
       <div class="form-group-header">
-        <label class="color-fg-default text-mono f6">RootFS Partition Size (MB):</label>
+        <label class="color-fg-default text-mono f6">RootFS Partition Size (MB): (固件大小MB)</label>
       </div>
       <div class="form-group-body">
-        <input class="form-control input-contrast input-sm" type="number" id="rootfs_partsize"
-          name="inputs[rootfs_partsize]" value="256" min="64" max="4096" />
+        <select class="form-select form-control select-sm input-contrast" id="rootfs_partsize"
+          name="inputs[rootfs_partsize]" value="">
+          <option value="512">512</option>
+          <option selected="selected" value="1024">1024</option>
+          <option value="2048">2048</option>
+        </select>
       </div>
     </div>
 
     <div class="form-group mt-1 mb-2" id="network_lan_item">
       <div class="form-group-header">
-        <label class="color-fg-default text-mono f6">Network LAN Address:</label>
+        <label class="color-fg-default text-mono f6">Network LAN Address: (LAN地址)</label>
       </div>
       <div class="form-group-body">
         <input class="form-control input-contrast input-sm" type="text" id="network_lan"
-          name="inputs[network_lan]" value="192.168.1.1" />
+          name="inputs[network_lan]" value="10.10.10.254" placeholder="e.g., 10.10.10.254" />
       </div>
     </div>
 
     <div class="form-group mt-1 mb-2" id="docker_item">
       <div class="form-group-header">
-        <label class="color-fg-default text-mono f6">Include Docker:</label>
+        <label class="color-fg-default text-mono f6">Include Docker: (是否添加Docker)</label>
       </div>
       <div class="form-group-body">
         <select class="form-select form-control select-sm input-contrast" id="docker" name="inputs[docker]"
@@ -225,34 +421,55 @@
 
     <div class="form-group mt-1 mb-2" id="enable_pppoe_item">
       <div class="form-group-header">
-        <label class="color-fg-default text-mono f6">Enable PPPoE:</label>
+        <label class="color-fg-default text-mono f6">Enable PPPoE: (是否设置拨号模式)</label>
       </div>
       <div class="form-group-body">
         <select class="form-select form-control select-sm input-contrast" id="enable_pppoe"
           name="inputs[enable_pppoe]" value="">
-          <option selected="selected" value="false">false</option>
-          <option value="true">true</option>
+          <option value="false">false</option>
+          <option selected="selected" value="true">true</option>
         </select>
       </div>
     </div>
 
     <div class="form-group mt-1 mb-2" id="pppoe_account_item" style="display: none;">
       <div class="form-group-header">
-        <label class="color-fg-default text-mono f6">PPPoE Account:</label>
+        <label class="color-fg-default text-mono f6">PPPoE Account: (宽带账号)</label>
       </div>
       <div class="form-group-body">
         <input class="form-control input-contrast input-sm" type="text" id="pppoe_account"
-          name="inputs[pppoe_account]" value="" />
+          name="inputs[pppoe_account]" value="" placeholder="可选，可留空" />
       </div>
     </div>
 
     <div class="form-group mt-1 mb-2" id="pppoe_password_item" style="display: none;">
       <div class="form-group-header">
-        <label class="color-fg-default text-mono f6">PPPoE Password:</label>
+        <label class="color-fg-default text-mono f6">PPPoE Password: (宽带密码)</label>
       </div>
       <div class="form-group-body">
         <input class="form-control input-contrast input-sm" type="password" id="pppoe_password"
-          name="inputs[pppoe_password]" value="" />
+          name="inputs[pppoe_password]" value="" placeholder="可选，可留空" />
+      </div>
+    </div>
+
+    <div class="form-group mt-1 mb-2" id="packages_item">
+      <div class="form-group-header">
+        <label class="color-fg-default text-mono f6">Packages: (点击选择插件包)</label>
+      </div>
+      <div class="form-group-body">
+        <textarea class="textarea-style input-contrast input-sm" type="text" id="packages"
+          name="inputs[packages]" style="height: 80px;" placeholder="选择或手动输入插件包名称，用空格或逗号分隔"></textarea>
+        <div id="packages_container"></div>
+      </div>
+    </div>
+
+    <div class="form-group mt-1 mb-2" id="script_item">
+      <div class="form-group-header">
+        <label class="color-fg-default text-mono f6">Custom Script: (自定义脚本)</label>
+      </div>
+      <div class="form-group-body">
+        <textarea class="textarea-style input-contrast input-sm" type="text" id="script"
+          name="inputs[script]" style="height: 120px;" placeholder="可选，输入自定义 Shell 脚本内容"></textarea>
       </div>
     </div>
 
@@ -265,22 +482,33 @@
         <p><strong>使用说明：</strong></p>
         <ol>
           <li>选择分支 (OpenWrt 或 ImmortalWrt)</li>
-          <li>输入设备名称 (如: x86-64, rockchip-armv8)</li>
-          <li>选择版本号</li>
+          <li>选择设备架构（从 JS 文件读取）</li>
+          <li>选择具体型号（根据架构自动更新）</li>
+          <li>选择版本号（根据分支自动更新）</li>
+          <li>点击选择需要的插件包和主题</li>
+          <li>输入自定义脚本（可选）</li>
           <li>配置其他参数（可选）</li>
           <li>点击 "Create Issue" 提交构建请求</li>
         </ol>
-        <p><strong>常用设备名称：</strong></p>
+        <p><strong>数据来源：</strong></p>
         <ul>
-          <li>x86-64: 通用 x86 64位设备</li>
-          <li>rockchip-armv8: Rockchip ARM 设备</li>
-          <li>ramips-mt7621: MediaTek MT7621 设备</li>
-          <li>ath79-generic: Atheros AR71xx/AR9xxx 设备</li>
+          <li>设备列表：<code>js/device.js</code> (image 对象)</li>
+          <li>插件包列表：<code>js/packages.js</code></li>
+          <li>版本列表：<code>js/packages.js</code> (versions 对象)</li>
+        </ul>
+        <p><strong>设备格式：</strong></p>
+        <ul>
+          <li>image 参数：架构名称（如 x86_64, rockchip-armv8）</li>
+          <li>device 参数：设备型号（如 generic, friendlyarm_nanopi-r6s）</li>
+          <li>示例：image="x86_64", device="generic"</li>
         </ul>
       </div>
     </div>
 
   </div>
+
+  <script src="./js/device.js"></script>
+  <script src="./js/packages.js"></script>
 </body>
 
 </html>
