@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="zh-Hans-CN" data-color-mode="auto" data-light-theme="light" data-dark-theme="dark"
+  data-a11y-animated-images="system">
+
+<head>
+  <meta charset="utf-8" />
+  <link rel="dns-prefetch" href="https://github.githubassets.com" />
+  <link rel="dns-prefetch" href="https://avatars.githubusercontent.com" />
+  <link rel="dns-prefetch" href="https://github-cloud.s3.amazonaws.com" />
+  <link rel="dns-prefetch" href="https://user-images.githubusercontent.com/" />
+  <link rel="preconnect" href="https://github.githubassets.com" crossorigin />
+  <link rel="preconnect" href="https://avatars.githubusercontent.com" />
+
+  <link crossorigin="anonymous" media="all" rel="stylesheet"
+    href="https://github.githubassets.com/assets/light-0eace2597ca3.css" />
+  <link crossorigin="anonymous" media="all" rel="stylesheet"
+    href="https://github.githubassets.com/assets/dark-a167e256da9c.css" />
+
+  <link crossorigin="anonymous" media="all" rel="stylesheet"
+    href="https://github.githubassets.com/assets/primer-711f412bb361.css" />
+  <link crossorigin="anonymous" media="all" rel="stylesheet"
+    href="https://github.githubassets.com/assets/global-78704364aaba.css" />
+  <style>
+    select,
+    .input-style {
+      width: 100%;
+    }
+
+    .textarea-style {
+      width: 100%;
+    }
+
+    #logo {
+      text-align: center;
+      margin: 20px auto !important;
+    }
+
+    #labels {
+      text-align: center;
+      margin: 20px auto !important;
+      height: auto !important;
+    }
+
+    .form-group {
+      margin-top: 1rem;
+      margin-bottom: 1rem;
+    }
+  </style>
+  <script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
+  <script type="application/javascript">
+    var repo = "3wlh/Actions-ImageaBuilder";
+
+    function getUrlParam(paraName) {
+      var url = document.location.toString();
+      var arrObj = url.split("?");
+      if (arrObj.length > 1) {
+        var arrPara = arrObj[1].split("&");
+        var arr;
+        for (var i = 0; i < arrPara.length; i++) {
+          arr = arrPara[i].split("=");
+          if (arr != null && arr[0] == paraName) {
+            return arr[1];
+          }
+        }
+      }
+      return "";
+    }
+
+    window.onload = function () {
+      init();
+    }
+
+    function init() {
+      $("#branch").on("change", changeBranch);
+      $("#enable_pppoe").on("change", togglePPPoE);
+      togglePPPoE();
+      changeBranch();
+    }
+
+    function changeBranch() {
+      var branch = $("#branch").val();
+      var versionSelect = $("#version")[0];
+      versionSelect.options.length = 0;
+
+      if (branch === "openwrt") {
+        var versions = ["23.05.5", "23.05.4", "23.05.3", "23.05.2", "23.05.1", "23.05.0", "SNAPSHOT"];
+        versions.forEach(function (v) {
+          versionSelect.options.add(new Option(v, v));
+        });
+      } else if (branch === "immortalwrt") {
+        var versions = ["23.05.4", "23.05.3", "23.05.2", "23.05.1", "23.05.0", "SNAPSHOT"];
+        versions.forEach(function (v) {
+          versionSelect.options.add(new Option(v, v));
+        });
+      }
+    }
+
+    function togglePPPoE() {
+      var enable_pppoe = $("#enable_pppoe").val();
+      if (enable_pppoe === "true") {
+        $("#pppoe_account_item").show();
+        $("#pppoe_password_item").show();
+      } else {
+        $("#pppoe_account_item").hide();
+        $("#pppoe_password_item").hide();
+      }
+    }
+
+    function createIssues() {
+      var title = "build " + new Date().toISOString().substr(0, 10);
+      var body = {};
+
+      var parameters = ["branch", "device", "version", "rootfs_partsize", "network_lan", "docker", "enable_pppoe", "pppoe_account", "pppoe_password"];
+
+      parameters.forEach(function (name) {
+        if ($("#" + name).is(":hidden")) {
+          return;
+        }
+        var value = $("#" + name).val();
+        if (value) {
+          body[name] = value;
+        }
+      });
+
+      body = JSON.stringify(body, null, 2).replace(/\+/g, "%2b");
+      window.location.href = `https://github.com/${repo}/issues/new?title=${title}&body=${encodeURIComponent(body)}`;
+    }
+  </script>
+
+  <title>OpenWrt ImageBuilder</title>
+  <link rel="icon" href="https://avatars.githubusercontent.com/u/151816514?s=200&v=4">
+</head>
+
+<body class="logged-in env-production page-responsive" style="word-wrap: break-word">
+  <div class="application-main left-0 text-left p-3 mx-auto container-xl px-3 px-md-4 px-lg-5 mt-4">
+    <div id="logo" style="
+          display: block;
+          font-family: ui-monospace, SFMono-Regular, SF Mono, Menlo, Consolas,
+            Liberation Mono, monospace !important;
+          font-size: 16px !important;
+          line-height: 16px !important;
+          margin: 15px 10px;
+          color: #00bfff;
+          text-align: center;
+        ">
+      <h1>OpenWrt / ImmortalWrt ImageBuilder</h1>
+    </div>
+    <div class="shields" id="labels">
+      <a id="titleA" href="https://github.com/3wlh/Actions-ImageaBuilder">
+        <img alt="GitHub Release"
+          src="https://img.shields.io/github/v/release/3wlh/Actions-ImageaBuilder?include_prereleases&style=flat-square&label=current">
+      </a>
+      <a id="titleA" href="https://github.com/3wlh/Actions-ImageaBuilder">
+        <img alt="GitHub Issues"
+          src="https://img.shields.io/github/issues-closed-raw/3wlh/Actions-ImageaBuilder/build?style=flat-square&label=build">
+      </a>
+    </div>
+
+    <div class="form-group mt-1 mb-2" id="branch_item">
+      <div class="form-group-header">
+        <label class="color-fg-default text-mono f6">Branch:</label>
+      </div>
+      <div class="form-group-body">
+        <select class="form-select form-control select-sm input-contrast" id="branch" name="inputs[branch]" value="">
+          <option selected="selected" value="openwrt">openwrt</option>
+          <option value="immortalwrt">immortalwrt</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="form-group mt-1 mb-2" id="device_item">
+      <div class="form-group-header">
+        <label class="color-fg-default text-mono f6">Device:</label>
+      </div>
+      <div class="form-group-body">
+        <input class="form-control input-contrast input-sm" type="text" id="device" name="inputs[device]"
+          placeholder="e.g., x86-64, rockchip-armv8, ramips-mt7621" value="x86-64" />
+      </div>
+    </div>
+
+    <div class="form-group mt-1 mb-2" id="version_item">
+      <div class="form-group-header">
+        <label class="color-fg-default text-mono f6">Version:</label>
+      </div>
+      <div class="form-group-body">
+        <select class="form-select form-control select-sm input-contrast" id="version" name="inputs[version]"
+          value="">
+          <option selected="selected" value="23.05.5">23.05.5</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="form-group mt-1 mb-2" id="rootfs_partsize_item">
+      <div class="form-group-header">
+        <label class="color-fg-default text-mono f6">RootFS Partition Size (MB):</label>
+      </div>
+      <div class="form-group-body">
+        <input class="form-control input-contrast input-sm" type="number" id="rootfs_partsize"
+          name="inputs[rootfs_partsize]" value="256" min="64" max="4096" />
+      </div>
+    </div>
+
+    <div class="form-group mt-1 mb-2" id="network_lan_item">
+      <div class="form-group-header">
+        <label class="color-fg-default text-mono f6">Network LAN Address:</label>
+      </div>
+      <div class="form-group-body">
+        <input class="form-control input-contrast input-sm" type="text" id="network_lan"
+          name="inputs[network_lan]" value="192.168.1.1" />
+      </div>
+    </div>
+
+    <div class="form-group mt-1 mb-2" id="docker_item">
+      <div class="form-group-header">
+        <label class="color-fg-default text-mono f6">Include Docker:</label>
+      </div>
+      <div class="form-group-body">
+        <select class="form-select form-control select-sm input-contrast" id="docker" name="inputs[docker]"
+          value="">
+          <option selected="selected" value="false">false</option>
+          <option value="true">true</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="form-group mt-1 mb-2" id="enable_pppoe_item">
+      <div class="form-group-header">
+        <label class="color-fg-default text-mono f6">Enable PPPoE:</label>
+      </div>
+      <div class="form-group-body">
+        <select class="form-select form-control select-sm input-contrast" id="enable_pppoe"
+          name="inputs[enable_pppoe]" value="">
+          <option selected="selected" value="false">false</option>
+          <option value="true">true</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="form-group mt-1 mb-2" id="pppoe_account_item" style="display: none;">
+      <div class="form-group-header">
+        <label class="color-fg-default text-mono f6">PPPoE Account:</label>
+      </div>
+      <div class="form-group-body">
+        <input class="form-control input-contrast input-sm" type="text" id="pppoe_account"
+          name="inputs[pppoe_account]" value="" />
+      </div>
+    </div>
+
+    <div class="form-group mt-1 mb-2" id="pppoe_password_item" style="display: none;">
+      <div class="form-group-header">
+        <label class="color-fg-default text-mono f6">PPPoE Password:</label>
+      </div>
+      <div class="form-group-body">
+        <input class="form-control input-contrast input-sm" type="password" id="pppoe_password"
+          name="inputs[pppoe_password]" value="" />
+      </div>
+    </div>
+
+    <div class="form-group mt-3 mb-2">
+      <button type="button" class="btn btn-primary" onclick="createIssues()">Create Issue</button>
+    </div>
+
+    <div class="form-group mt-3 mb-2">
+      <div class="color-fg-muted text-small">
+        <p><strong>使用说明：</strong></p>
+        <ol>
+          <li>选择分支 (OpenWrt 或 ImmortalWrt)</li>
+          <li>输入设备名称 (如: x86-64, rockchip-armv8)</li>
+          <li>选择版本号</li>
+          <li>配置其他参数（可选）</li>
+          <li>点击 "Create Issue" 提交构建请求</li>
+        </ol>
+        <p><strong>常用设备名称：</strong></p>
+        <ul>
+          <li>x86-64: 通用 x86 64位设备</li>
+          <li>rockchip-armv8: Rockchip ARM 设备</li>
+          <li>ramips-mt7621: MediaTek MT7621 设备</li>
+          <li>ath79-generic: Atheros AR71xx/AR9xxx 设备</li>
+        </ul>
+      </div>
+    </div>
+
+  </div>
+</body>
+
+</html>
